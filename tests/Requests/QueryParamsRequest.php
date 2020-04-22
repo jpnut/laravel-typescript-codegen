@@ -2,9 +2,9 @@
 
 namespace JPNut\Tests\Requests;
 
+use JPNut\Tests\DTOs\BarRequestParamsDTO;
 use Illuminate\Foundation\Http\FormRequest;
 use JPNut\CodeGen\Contracts\CodeGenRequest;
-use JPNut\Tests\DTOs\BarRequestParamsDTO;
 
 class QueryParamsRequest extends FormRequest implements CodeGenRequest
 {

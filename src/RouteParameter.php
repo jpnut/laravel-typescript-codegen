@@ -20,7 +20,7 @@ class RouteParameter
      */
     public function __construct(string $name, bool $nullable = false)
     {
-        $this->name     = $name;
+        $this->name = $name;
         $this->nullable = $nullable;
     }
 

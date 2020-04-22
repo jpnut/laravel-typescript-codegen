@@ -2,12 +2,12 @@
 
 namespace JPNut\CodeGen;
 
-use Illuminate\Contracts\Support\DeferrableProvider;
 use Illuminate\Routing\Router;
 use Illuminate\Support\ServiceProvider;
-use JPNut\CodeGen\Contracts\InterfaceWriterContract;
-use JPNut\CodeGen\Contracts\MethodWriterContract;
 use phpDocumentor\Reflection\DocBlockFactory;
+use JPNut\CodeGen\Contracts\MethodWriterContract;
+use Illuminate\Contracts\Support\DeferrableProvider;
+use JPNut\CodeGen\Contracts\InterfaceWriterContract;
 
 class CodeGenServiceProvider extends ServiceProvider implements DeferrableProvider
 {
@@ -30,15 +30,15 @@ class CodeGenServiceProvider extends ServiceProvider implements DeferrableProvid
         $docBlockReader = DocBlockFactory::createInstance(['code-gen' => CodeGenTag::class]);
 
         $registrar = new TypeRegistrar($docBlockReader);
-        $this->app->singleton(TypeRegistrar::class, fn() => $registrar);
+        $this->app->singleton(TypeRegistrar::class, fn () => $registrar);
 
         $interfaceWriter = $this->app->make($config['interface']);
-        $this->app->bind(InterfaceWriterContract::class, fn() => $interfaceWriter);
+        $this->app->bind(InterfaceWriterContract::class, fn () => $interfaceWriter);
 
         $methodWriter = $this->app->make($config['method']);
-        $this->app->bind(MethodWriterContract::class, fn() => $methodWriter);
+        $this->app->bind(MethodWriterContract::class, fn () => $methodWriter);
 
-        $this->app->bind(Generator::class, fn() => new Generator(
+        $this->app->bind(Generator::class, fn () => new Generator(
             $this->app->make(Router::class),
             $registrar,
             $interfaceWriter,

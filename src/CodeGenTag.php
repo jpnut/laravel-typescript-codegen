@@ -2,12 +2,12 @@
 
 namespace JPNut\CodeGen;
 
-use phpDocumentor\Reflection\DocBlock\Description;
-use phpDocumentor\Reflection\DocBlock\DescriptionFactory;
-use phpDocumentor\Reflection\DocBlock\Serializer;
-use phpDocumentor\Reflection\DocBlock\Tags\BaseTag;
-use phpDocumentor\Reflection\DocBlock\Tags\Factory\StaticMethod;
 use phpDocumentor\Reflection\Types\Context;
+use phpDocumentor\Reflection\DocBlock\Serializer;
+use phpDocumentor\Reflection\DocBlock\Description;
+use phpDocumentor\Reflection\DocBlock\Tags\BaseTag;
+use phpDocumentor\Reflection\DocBlock\DescriptionFactory;
+use phpDocumentor\Reflection\DocBlock\Tags\Factory\StaticMethod;
 
 final class CodeGenTag extends BaseTag implements StaticMethod
 {

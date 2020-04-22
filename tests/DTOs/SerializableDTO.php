@@ -7,10 +7,10 @@ use JsonSerializable;
 class SerializableDTO implements JsonSerializable
 {
     /**
-     * @return string|integer
+     * @return string|int
      */
     public function jsonSerialize()
     {
-        return "foo";
+        return 'foo';
     }
 }

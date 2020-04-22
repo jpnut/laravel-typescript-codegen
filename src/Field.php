@@ -26,8 +26,8 @@ class Field
      */
     public function __construct(string $name, array $types, bool $nullable)
     {
-        $this->name     = $name;
-        $this->types    = $types;
+        $this->name = $name;
+        $this->types = $types;
         $this->nullable = $nullable;
     }
 

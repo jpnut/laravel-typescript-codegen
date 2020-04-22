@@ -83,7 +83,7 @@ class FooDTO
     public $soft_nullable_child;
 
     /**
-     * @var int|float|double
+     * @var int|float|float
      */
     public $number;
 

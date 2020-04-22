@@ -40,11 +40,11 @@ class TypeResolverTest extends TestCase
         $this->assertEquals(true, $declaration->isMixedArray);
         $this->assertEquals(
             ['any[]', 'Foo[]'],
-            array_map(fn(FieldType $type) => $type->getType(), $declaration->allowedTypes)
+            array_map(fn (FieldType $type) => $type->getType(), $declaration->allowedTypes)
         );
         $this->assertEquals(
             ['Foo'],
-            array_map(fn(FieldType $type) => $type->getType(), $declaration->allowedArrayTypes)
+            array_map(fn (FieldType $type) => $type->getType(), $declaration->allowedArrayTypes)
         );
     }
 }

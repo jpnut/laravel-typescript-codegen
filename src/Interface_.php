@@ -22,7 +22,7 @@ class Interface_ implements Type
      */
     public function __construct(string $name, array $fields = [])
     {
-        $this->name   = $name;
+        $this->name = $name;
         $this->fields = $fields;
     }
 

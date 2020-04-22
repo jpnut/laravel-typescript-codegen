@@ -3,14 +3,14 @@
 namespace JPNut\CodeGen;
 
 use Carbon\Carbon;
+use ReflectionClass;
+use JsonSerializable;
+use ReflectionMethod;
 use Illuminate\Routing\Route;
 use InvalidArgumentException;
-use JPNut\CodeGen\Contracts\CodeGenRequest;
 use JPNut\CodeGen\Contracts\Type;
-use JsonSerializable;
+use JPNut\CodeGen\Contracts\CodeGenRequest;
 use phpDocumentor\Reflection\DocBlockFactory;
-use ReflectionClass;
-use ReflectionMethod;
 
 class TypeRegistrar
 {
@@ -20,7 +20,7 @@ class TypeRegistrar
 
     private const REQUEST_METHODS = [
         'body'   => 'body',
-        'queryParams' => 'queryParams'
+        'queryParams' => 'queryParams',
     ];
 
     /**
@@ -49,7 +49,7 @@ class TypeRegistrar
     public function __construct(DocBlockFactory $docBlockReader)
     {
         $this->docBlockReader = $docBlockReader;
-        $this->resolver       = new TypeResolver($docBlockReader);
+        $this->resolver = new TypeResolver($docBlockReader);
 
         $this->addDefaultTypes();
     }
@@ -93,7 +93,7 @@ class TypeRegistrar
      */
     public function generateTypesFromClass(string $name): string
     {
-        if (!class_exists($name)) {
+        if (! class_exists($name)) {
             throw new InvalidArgumentException("Cannot generate types for class '{$name}': Class does not exist.");
         }
 
@@ -119,7 +119,7 @@ class TypeRegistrar
         $this->addType($interface = new Interface_($name));
 
         foreach ($class->getProperties() as $property) {
-            if (!$property->isPublic()) {
+            if (! $property->isPublic()) {
                 continue;
             }
 
@@ -145,7 +145,7 @@ class TypeRegistrar
      */
     public function has(?string $name): bool
     {
-        return !is_null($name) && isset($this->types[$name]);
+        return ! is_null($name) && isset($this->types[$name]);
     }
 
     /**
@@ -190,7 +190,7 @@ class TypeRegistrar
             $name = (new ReflectionClass($name))->getName();
         }
 
-        if (!$this->has($name)) {
+        if (! $this->has($name)) {
             throw new InvalidArgumentException("Type with name {$name} not found.");
         }
 
@@ -241,7 +241,7 @@ class TypeRegistrar
         foreach (static::DEFAULT_LITERALS as $name => $types) {
             $this->addType(new Literal(
                 $name,
-                array_map(fn(string $type) => new FieldType($type), $types)
+                array_map(fn (string $type) => new FieldType($type), $types)
             ));
         }
 
@@ -265,7 +265,7 @@ class TypeRegistrar
     private function addMethodReturnTypes(Method $method): self
     {
         foreach ($method->getReturnTypes() as $returnType) {
-            if (!$returnType->isClass()) {
+            if (! $returnType->isClass()) {
                 continue;
             }
 
@@ -290,7 +290,7 @@ class TypeRegistrar
      */
     private function addMethodRequestType(Method $method): self
     {
-        if (!$method->hasRequestType() || $this->has($className = $method->getRequestType()->getSingular())) {
+        if (! $method->hasRequestType() || $this->has($className = $method->getRequestType()->getSingular())) {
             return $this;
         }
 
@@ -314,9 +314,8 @@ class TypeRegistrar
 
         foreach ($class->getMethods() as $method) {
             if ($method->isPublic()
-                && !is_null($field = $this->requestMethodCodeGenType($method))
+                && ! is_null($field = $this->requestMethodCodeGenType($method))
                 && isset(static::REQUEST_METHODS[$field])) {
-
                 $fields[$field] = new Field(
                     $field,
                     ($methodDeclaration = $this->resolver->fromReflectionMethod($method))->allowedTypes,
@@ -370,8 +369,8 @@ class TypeRegistrar
     private function requestMethodCodeGenType(ReflectionMethod $method): ?string
     {
         if ($method->getDocComment() === false
-            || empty ($codeGenTags = $this->docBlockReader->create($method->getDocComment())->getTagsByName('code-gen'))
-            || !(($tag = $codeGenTags[0]) instanceof CodeGenTag)) {
+            || empty($codeGenTags = $this->docBlockReader->create($method->getDocComment())->getTagsByName('code-gen'))
+            || ! (($tag = $codeGenTags[0]) instanceof CodeGenTag)) {
             return null;
         }
 

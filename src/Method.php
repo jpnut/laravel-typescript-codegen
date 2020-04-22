@@ -2,8 +2,8 @@
 
 namespace JPNut\CodeGen;
 
-use Illuminate\Routing\Route;
 use ReflectionMethod;
+use Illuminate\Routing\Route;
 
 class Method
 {
@@ -39,10 +39,10 @@ class Method
         ?FieldType $request_type = null,
         array $return_types = []
     ) {
-        $this->route            = $route;
+        $this->route = $route;
         $this->reflectionMethod = $reflectionMethod;
-        $this->request_type     = $request_type;
-        $this->return_types     = $return_types;
+        $this->request_type = $request_type;
+        $this->return_types = $return_types;
     }
 
     /**
@@ -50,7 +50,7 @@ class Method
      */
     public function hasRequestType(): bool
     {
-        return !is_null($this->request_type);
+        return ! is_null($this->request_type);
     }
 
     /**
