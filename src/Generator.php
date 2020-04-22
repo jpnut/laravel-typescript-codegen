@@ -3,11 +3,11 @@
 namespace JPNut\CodeGen;
 
 use Closure;
+use ReflectionMethod;
+use Illuminate\Support\Str;
 use Illuminate\Routing\Route;
 use Illuminate\Routing\Router;
-use Illuminate\Support\Str;
 use phpDocumentor\Reflection\DocBlockFactory;
-use ReflectionMethod;
 
 class Generator
 {
@@ -50,11 +50,11 @@ class Generator
         MethodWriter $methodWriter,
         DocBlockFactory $docBlockReader
     ) {
-        $this->router          = $router;
-        $this->registrar       = $registrar;
+        $this->router = $router;
+        $this->registrar = $registrar;
         $this->interfaceWriter = $interfaceWriter;
-        $this->methodWriter    = $methodWriter;
-        $this->docBlockReader  = $docBlockReader;
+        $this->methodWriter = $methodWriter;
+        $this->docBlockReader = $docBlockReader;
     }
 
     /**
@@ -74,7 +74,7 @@ class Generator
             $results[] = $this->methodWriter->write($method);
         }
 
-        return join("\n\n", $results);
+        return implode("\n\n", $results);
     }
 
     /**
@@ -83,10 +83,10 @@ class Generator
     public function generate(): GeneratorResult
     {
         array_map(
-            fn(Route $route) => $this->createMethodFromRoute($route),
+            fn (Route $route) => $this->createMethodFromRoute($route),
             array_filter(
                 $this->router->getRoutes()->getIterator()->getArrayCopy(),
-                fn(Route $route) => !($route->getAction('uses') instanceof Closure)
+                fn (Route $route) => ! ($route->getAction('uses') instanceof Closure)
             )
         );
 
@@ -103,7 +103,7 @@ class Generator
         $reflectionMethod = new ReflectionMethod($callback[0], $callback[1]);
 
         if (($docComment = $reflectionMethod->getDocComment()) === false
-            || !$this->docBlockReader->create($docComment)->hasTag('code-gen')) {
+            || ! $this->docBlockReader->create($docComment)->hasTag('code-gen')) {
             return;
         }
 

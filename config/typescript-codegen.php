@@ -1,7 +1,7 @@
 <?php
 
-use JPNut\CodeGen\InterfaceWriter;
 use JPNut\CodeGen\MethodWriter;
+use JPNut\CodeGen\InterfaceWriter;
 
 return [
     /**

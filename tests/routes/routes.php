@@ -25,4 +25,3 @@ Route::get('/bar/https-only', ['https', 'uses' => BarController::class.'@httpsOn
 Route::get('/bar/domain', BarController::class.'@domain')
     ->domain('https://localhost.dev')
     ->name('bar.domain');
-

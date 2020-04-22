@@ -2,8 +2,8 @@
 
 namespace JPNut\CodeGen;
 
-use Illuminate\Routing\Route;
 use Illuminate\Support\Str;
+use Illuminate\Routing\Route;
 use InvalidArgumentException;
 
 class MethodWriter
@@ -33,8 +33,8 @@ class MethodWriter
         TypeRegistrar $registrar,
         FieldTypeWriter $fieldTypeWriter
     ) {
-        $this->generator       = $generator;
-        $this->registrar       = $registrar;
+        $this->generator = $generator;
+        $this->registrar = $registrar;
         $this->fieldTypeWriter = $fieldTypeWriter;
     }
 
@@ -44,15 +44,15 @@ class MethodWriter
      */
     public function write(Method $method): string
     {
-        return join("", [
-            "export const ",
+        return implode('', [
+            'export const ',
             $this->routeToMethodName($route = $method->getRoute()),
-            " = ",
+            ' = ',
             "({$this->functionParameters($method, $route, $fields = $this->functionFields($method))}): ",
             "Promise<{$this->formatReturnType($method)}>",
-            " => ",
+            ' => ',
             $this->routeToFunctionCall($route, $fields),
-            ";"
+            ';',
         ]);
     }
 
@@ -66,7 +66,7 @@ class MethodWriter
                 ' ',
                 '',
                 Str::camel(preg_replace('/[.-_]+/', ' ', $route->getName()))
-            )."Request";
+            ).'Request';
     }
 
     /**
@@ -77,9 +77,9 @@ class MethodWriter
      */
     protected function functionParameters(Method $method, Route $route, array $fields): string
     {
-        return join(", ", array_filter([
+        return implode(', ', array_filter([
             $this->requestParameters($method, $fields),
-            ...$this->routeParameters($route)
+            ...$this->routeParameters($route),
         ]));
     }
 
@@ -94,7 +94,7 @@ class MethodWriter
             return null;
         }
 
-        return "{ ".join(', ', $fields)." }: {$this->registrar->formatName($requestType->getSingular())}";
+        return '{ '.implode(', ', $fields)." }: {$this->registrar->formatName($requestType->getSingular())}";
     }
 
     /**
@@ -103,7 +103,7 @@ class MethodWriter
      */
     protected function routeParameters(Route $route): array
     {
-        return array_map(fn(RouteParameter $rp) => $rp->toFunctionParameter(), $this->parameters($route));
+        return array_map(fn (RouteParameter $rp) => $rp->toFunctionParameter(), $this->parameters($route));
     }
 
     /**
@@ -125,17 +125,17 @@ class MethodWriter
      */
     protected function functionFields(Method $method): array
     {
-        if (!$method->hasRequestType()) {
+        if (! $method->hasRequestType()) {
             return [];
         }
 
         $type = $this->registrar->getType($method->getRequestType()->getSingular());
 
-        if (!$type instanceof Interface_) {
+        if (! $type instanceof Interface_) {
             throw new InvalidArgumentException("Invalid request object - expected interface but got literal: {$type->name()}");
         }
 
-        return array_map(fn(Field $field) => $field->getName(), $type->getFields());
+        return array_map(fn (Field $field) => $field->getName(), $type->getFields());
     }
 
     /**
@@ -145,8 +145,8 @@ class MethodWriter
     protected function formatReturnType(Method $method): string
     {
         return empty($types = $this->getMethodReturnTypes($method))
-            ? "any"
-            : join(" | ", $types);
+            ? 'any'
+            : implode(' | ', $types);
     }
 
     /**
@@ -158,7 +158,7 @@ class MethodWriter
     {
         $uri = $this->generator->to(
             $route,
-            array_map(fn(RouteParameter $rp) => $rp->toUriComponent(), $this->parameters($route))
+            array_map(fn (RouteParameter $rp) => $rp->toUriComponent(), $this->parameters($route))
         );
 
         $method = in_array('GET', $route->methods) ? 'GET' : $route->methods[0];
@@ -169,7 +169,7 @@ class MethodWriter
         ], $fields);
 
         if (isset($properties['body'])) {
-            $properties['body'] = "JSON.stringify(body)";
+            $properties['body'] = 'JSON.stringify(body)';
         }
 
         return "request({ {$this->propertiesToString($properties)} })";
@@ -182,7 +182,7 @@ class MethodWriter
     protected function propertiesToString(array $properties): string
     {
         return collect($properties)
-            ->map(fn($value, $key) => $key === $value ? $key : "{$key}: {$value}")
+            ->map(fn ($value, $key) => $key === $value ? $key : "{$key}: {$value}")
             ->join(', ');
     }
 
@@ -194,7 +194,7 @@ class MethodWriter
     {
         return array_unique(
             array_map(
-                fn(FieldType $type) => $this->fieldTypeWriter->write($type),
+                fn (FieldType $type) => $this->fieldTypeWriter->write($type),
                 $method->getReturnTypes()
             )
         );

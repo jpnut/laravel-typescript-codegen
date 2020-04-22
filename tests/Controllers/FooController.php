@@ -41,7 +41,6 @@ class FooController
      */
     public function delete()
     {
-
     }
 
     public function create(): FooDTO

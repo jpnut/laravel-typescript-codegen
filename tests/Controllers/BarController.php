@@ -13,7 +13,7 @@ class BarController
      */
     public function scalarReturnType(): string
     {
-        return "bar";
+        return 'bar';
     }
 
     /**
@@ -43,7 +43,6 @@ class BarController
      */
     public function queryParams(QueryParamsRequest $request)
     {
-        return;
     }
 
     /**

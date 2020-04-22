@@ -22,7 +22,7 @@ class Literal implements Type
      */
     public function __construct(string $name, array $types)
     {
-        $this->name  = $name;
+        $this->name = $name;
         $this->types = $types;
     }
 
@@ -39,6 +39,6 @@ class Literal implements Type
      */
     public function toReference(): string
     {
-        return join(' | ', array_map(fn(FieldType $type) => $type->getType(), $this->types));
+        return implode(' | ', array_map(fn (FieldType $type) => $type->getType(), $this->types));
     }
 }

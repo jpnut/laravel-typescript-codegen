@@ -2,13 +2,13 @@
 
 namespace JPNut\CodeGen;
 
-use Illuminate\Support\Str;
-use phpDocumentor\Reflection\DocBlock\Tags\Return_;
-use phpDocumentor\Reflection\DocBlock\Tags\Var_;
-use phpDocumentor\Reflection\DocBlockFactory;
+use ReflectionType;
 use ReflectionMethod;
 use ReflectionProperty;
-use ReflectionType;
+use Illuminate\Support\Str;
+use phpDocumentor\Reflection\DocBlockFactory;
+use phpDocumentor\Reflection\DocBlock\Tags\Var_;
+use phpDocumentor\Reflection\DocBlock\Tags\Return_;
 
 class TypeResolver
 {
@@ -46,8 +46,8 @@ class TypeResolver
          * fallback to the type of the property.
          */
         if ($property->getDocComment() === false
-            || empty ($varTags = $this->docBlockReader->create($property->getDocComment())->getTagsByName('var'))
-            || !(($tag = $varTags[0]) instanceof Var_)) {
+            || empty($varTags = $this->docBlockReader->create($property->getDocComment())->getTagsByName('var'))
+            || ! (($tag = $varTags[0]) instanceof Var_)) {
             return $this->resolve(
                 is_null($property->getType())
                     ? null
@@ -71,8 +71,8 @@ class TypeResolver
          * fallback to the return type of the method.
          */
         if ($method->getDocComment() === false
-            || empty ($returnTags = $this->docBlockReader->create($method->getDocComment())->getTagsByName('return'))
-            || !(($tag = $returnTags[0]) instanceof Return_)) {
+            || empty($returnTags = $this->docBlockReader->create($method->getDocComment())->getTagsByName('return'))
+            || ! (($tag = $returnTags[0]) instanceof Return_)) {
             return $this->resolve(
                 is_null($method->getReturnType())
                     ? null
@@ -96,11 +96,11 @@ class TypeResolver
         $declaration = new TypeDeclaration($definition);
 
         $declaration->hasTypeDeclaration = $definition !== '';
-        $declaration->isNullable         = $this->resolveNullable($definition);
-        $declaration->isMixed            = $this->resolveIsMixed($definition);
-        $declaration->isMixedArray       = $this->resolveIsMixedArray($definition);
-        $declaration->allowedTypes       = $this->resolveAllowedTypes($definition);
-        $declaration->allowedArrayTypes  = $this->resolveAllowedArrayTypes($definition);
+        $declaration->isNullable = $this->resolveNullable($definition);
+        $declaration->isMixed = $this->resolveIsMixed($definition);
+        $declaration->isMixedArray = $this->resolveIsMixedArray($definition);
+        $declaration->allowedTypes = $this->resolveAllowedTypes($definition);
+        $declaration->allowedArrayTypes = $this->resolveAllowedArrayTypes($definition);
 
         return $declaration;
     }
@@ -111,7 +111,7 @@ class TypeResolver
      */
     protected function resolveNullable(string $definition): bool
     {
-        if (!$definition) {
+        if (! $definition) {
             return true;
         }
 
@@ -140,7 +140,7 @@ class TypeResolver
         $types = $this->normaliseTypes(...explode('|', $definition));
 
         foreach ($types as $type) {
-            if ($type->getType() === "any[]") {
+            if ($type->getType() === 'any[]') {
                 return true;
             }
         }
@@ -157,10 +157,10 @@ class TypeResolver
         return array_values(
             array_filter(
                 array_map(
-                    fn(string $type) => new FieldType(str_replace('?', '', self::$typeMapping[$type] ?? $type)),
-                    array_filter($types, fn(?string $type) => !is_null($type) && $type !== '')
+                    fn (string $type) => new FieldType(str_replace('?', '', self::$typeMapping[$type] ?? $type)),
+                    array_filter($types, fn (?string $type) => ! is_null($type) && $type !== '')
                 ),
-                fn(FieldType $fieldType) => !is_null($fieldType->getType())
+                fn (FieldType $fieldType) => ! is_null($fieldType->getType())
             )
         );
     }
@@ -182,8 +182,8 @@ class TypeResolver
     {
         return $this->normaliseTypes(...array_map(
             function (string $type) {
-                if (!$type) {
-                    return null;
+                if (! $type) {
+                    return;
                 }
 
                 if (strpos($type, '[]') !== false) {
@@ -193,8 +193,6 @@ class TypeResolver
                 if (strpos($type, 'iterable<') !== false) {
                     return str_replace(['iterable<', '>'], ['', ''], $type);
                 }
-
-                return null;
             },
             explode('|', $definition)
         ));

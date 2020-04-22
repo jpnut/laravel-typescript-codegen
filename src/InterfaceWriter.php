@@ -20,7 +20,7 @@ class InterfaceWriter
      */
     public function __construct(TypeRegistrar $registrar, FieldTypeWriter $fieldTypeWriter)
     {
-        $this->registrar       = $registrar;
+        $this->registrar = $registrar;
         $this->fieldTypeWriter = $fieldTypeWriter;
     }
 
@@ -30,10 +30,10 @@ class InterfaceWriter
      */
     public function write(Interface_ $interface): string
     {
-        return join("\n", [
+        return implode("\n", [
             "export interface {$this->registrar->formatName($interface->name())} {",
             ...$this->mapFieldsToDefinitions($interface),
-            "}"
+            '}',
         ]);
     }
 
@@ -44,7 +44,7 @@ class InterfaceWriter
     protected function mapFieldsToDefinitions(Interface_ $interface): array
     {
         return array_map(
-            fn(Field $field) => $this->getFieldDefinition($field),
+            fn (Field $field) => $this->getFieldDefinition($field),
             array_values($interface->getFields())
         );
     }
@@ -64,7 +64,7 @@ class InterfaceWriter
      */
     protected function getFieldName(Field $field): string
     {
-        return $field->getName().($field->nullable() ? "?" : "");
+        return $field->getName().($field->nullable() ? '?' : '');
     }
 
     /**
@@ -74,8 +74,8 @@ class InterfaceWriter
     protected function getCombinedFieldTypes(Field $field): string
     {
         return empty($field->getTypes())
-            ? "any"
-            : join(" | ", $this->getFieldTypes($field));
+            ? 'any'
+            : implode(' | ', $this->getFieldTypes($field));
     }
 
     /**
@@ -86,7 +86,7 @@ class InterfaceWriter
     {
         return array_unique(
             array_map(
-                fn(FieldType $type) => $this->fieldTypeWriter->write($type),
+                fn (FieldType $type) => $this->fieldTypeWriter->write($type),
                 $field->nullable() ? $this->addNullableType($field->getTypes()) : $field->getTypes()
             )
         );

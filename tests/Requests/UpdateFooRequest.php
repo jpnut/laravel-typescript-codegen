@@ -2,9 +2,9 @@
 
 namespace JPNut\Tests\Requests;
 
+use JPNut\Tests\DTOs\UpdateFooDTO;
 use Illuminate\Foundation\Http\FormRequest;
 use JPNut\CodeGen\Contracts\CodeGenRequest;
-use JPNut\Tests\DTOs\UpdateFooDTO;
 
 class UpdateFooRequest extends FormRequest implements CodeGenRequest
 {

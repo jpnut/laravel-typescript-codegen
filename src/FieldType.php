@@ -33,7 +33,7 @@ class FieldType
     {
         $type = static::$typeMapping[$type] ?? $type;
 
-        $this->type     = $type;
+        $this->type = $type;
         $this->singular = $this->parseSingularType($type);
     }
 
@@ -43,7 +43,7 @@ class FieldType
      */
     private function parseSingularType(?string $type): ?string
     {
-        if (!$type) {
+        if (! $type) {
             return null;
         }
 
@@ -63,7 +63,7 @@ class FieldType
      */
     public static function nullable(): self
     {
-        return new static("null");
+        return new static('null');
     }
 
     /**
@@ -71,7 +71,7 @@ class FieldType
      */
     public function isClass(): bool
     {
-        return !is_null($this->singular) && class_exists($this->singular);
+        return ! is_null($this->singular) && class_exists($this->singular);
     }
 
     /**
