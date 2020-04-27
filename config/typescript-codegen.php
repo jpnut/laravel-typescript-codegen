@@ -43,5 +43,5 @@ return [
      */
     'request_properties' => [
         'body' => 'JSON.stringify(body)',
-    ]
+    ],
 ];

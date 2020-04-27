@@ -2,9 +2,9 @@
 
 namespace JPNut\Tests;
 
-use Illuminate\Support\Facades\Artisan;
 use JPNut\CodeGen\Generator;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Artisan;
 
 class GeneratorTest extends TestCase
 {

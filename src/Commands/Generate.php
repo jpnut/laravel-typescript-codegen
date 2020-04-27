@@ -2,8 +2,8 @@
 
 namespace JPNut\CodeGen\Commands;
 
-use Illuminate\Console\Command;
 use JPNut\CodeGen\Generator;
+use Illuminate\Console\Command;
 
 class Generate extends Command
 {
