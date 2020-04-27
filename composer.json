@@ -2,10 +2,6 @@
     "name": "jpnut/laravel-typescript-codegen",
     "description": "Typescript Code Generation for Laravel",
     "type": "library",
-    "require-dev": {
-        "phpunit/phpunit": "^9.1",
-        "orchestra/testbench": "^5.1"
-    },
     "license": "MIT",
     "authors": [
         {
@@ -19,8 +15,11 @@
         "illuminate/contracts": "^7.0",
         "illuminate/routing": "^7.0",
         "illuminate/support": "^7.0",
-        "phpdocumentor/reflection-docblock": "^5.0",
-        "mikey179/vfsstream": "^1.6"
+        "phpdocumentor/reflection-docblock": "^5.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^9.1",
+        "orchestra/testbench": "^5.1"
     },
     "autoload": {
         "psr-4": {
@@ -30,6 +29,13 @@
     "autoload-dev": {
         "psr-4": {
             "JPNut\\Tests\\": "tests"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "JPNut\\CodeGen\\CodeGenServiceProvider"
+            ]
         }
     }
 }

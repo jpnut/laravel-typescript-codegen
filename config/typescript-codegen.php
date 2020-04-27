@@ -26,4 +26,22 @@ return [
      * as this will be used to insert the generated schema.
      */
     'stub'    => __DIR__.'/../src/stubs/schema.stub',
+
+    /**
+     * You can determine which request properties you would like
+     * to generate types for by changing the following option. By
+     * default, only methods which are tagged as 'body' will be
+     * generated, though you can add more (e.g. headers, query-
+     * params etc.). To generate types for these properties, you
+     * will still need add '@code-gen' followed by the property
+     * name to the doc block of the method.
+     *
+     * If you wish to pass the value as is, pass the property name
+     * as a value in the array. If you wish to map the value of the
+     * property, pass the name of the property as the key, and the
+     * mapped value of the property as the value.
+     */
+    'request_properties' => [
+        'body' => 'JSON.stringify(body)',
+    ]
 ];

@@ -3,24 +3,19 @@
 namespace JPNut\CodeGen;
 
 use Carbon\Carbon;
-use ReflectionClass;
-use JsonSerializable;
-use ReflectionMethod;
 use Illuminate\Routing\Route;
 use InvalidArgumentException;
-use JPNut\CodeGen\Contracts\Type;
 use JPNut\CodeGen\Contracts\CodeGenRequest;
+use JPNut\CodeGen\Contracts\Type;
+use JsonSerializable;
 use phpDocumentor\Reflection\DocBlockFactory;
+use ReflectionClass;
+use ReflectionMethod;
 
 class TypeRegistrar
 {
     private const DEFAULT_LITERALS = [
         Carbon::class => ['string'],
-    ];
-
-    private const REQUEST_METHODS = [
-        'body'   => 'body',
-        'queryParams' => 'queryParams',
     ];
 
     /**
@@ -44,12 +39,19 @@ class TypeRegistrar
     private TypeResolver $resolver;
 
     /**
-     * @param  \phpDocumentor\Reflection\DocBlockFactory  $docBlockReader
+     * @var string[]
      */
-    public function __construct(DocBlockFactory $docBlockReader)
+    private array $request_properties;
+
+    /**
+     * @param  \phpDocumentor\Reflection\DocBlockFactory  $docBlockReader
+     * @param  array  $request_properties
+     */
+    public function __construct(DocBlockFactory $docBlockReader, array $request_properties)
     {
-        $this->docBlockReader = $docBlockReader;
-        $this->resolver = new TypeResolver($docBlockReader);
+        $this->docBlockReader     = $docBlockReader;
+        $this->resolver           = new TypeResolver($docBlockReader);
+        $this->request_properties = $this->parseRequestProperties($request_properties);
 
         $this->addDefaultTypes();
     }
@@ -93,7 +95,7 @@ class TypeRegistrar
      */
     public function generateTypesFromClass(string $name): string
     {
-        if (! class_exists($name)) {
+        if (!class_exists($name)) {
             throw new InvalidArgumentException("Cannot generate types for class '{$name}': Class does not exist.");
         }
 
@@ -119,7 +121,7 @@ class TypeRegistrar
         $this->addType($interface = new Interface_($name));
 
         foreach ($class->getProperties() as $property) {
-            if (! $property->isPublic()) {
+            if (!$property->isPublic()) {
                 continue;
             }
 
@@ -145,7 +147,7 @@ class TypeRegistrar
      */
     public function has(?string $name): bool
     {
-        return ! is_null($name) && isset($this->types[$name]);
+        return !is_null($name) && isset($this->types[$name]);
     }
 
     /**
@@ -190,7 +192,7 @@ class TypeRegistrar
             $name = (new ReflectionClass($name))->getName();
         }
 
-        if (! $this->has($name)) {
+        if (!$this->has($name)) {
             throw new InvalidArgumentException("Type with name {$name} not found.");
         }
 
@@ -212,6 +214,27 @@ class TypeRegistrar
     public function formatName(string $name): string
     {
         return str_replace('\\', '', $name);
+    }
+
+    /**
+     * @return array
+     */
+    public function getRequestProperties(): array
+    {
+        return $this->request_properties;
+    }
+
+    /**
+     * @param  string  $field
+     * @return string
+     */
+    public function requestPropertyValue(string $field): string
+    {
+        if (!isset($this->request_properties[$field])) {
+            throw new InvalidArgumentException("Request Field not found: {$field}");
+        }
+
+        return $this->request_properties[$field];
     }
 
     /**
@@ -241,7 +264,7 @@ class TypeRegistrar
         foreach (static::DEFAULT_LITERALS as $name => $types) {
             $this->addType(new Literal(
                 $name,
-                array_map(fn (string $type) => new FieldType($type), $types)
+                array_map(fn(string $type) => new FieldType($type), $types)
             ));
         }
 
@@ -265,7 +288,7 @@ class TypeRegistrar
     private function addMethodReturnTypes(Method $method): self
     {
         foreach ($method->getReturnTypes() as $returnType) {
-            if (! $returnType->isClass()) {
+            if (!$returnType->isClass()) {
                 continue;
             }
 
@@ -290,7 +313,7 @@ class TypeRegistrar
      */
     private function addMethodRequestType(Method $method): self
     {
-        if (! $method->hasRequestType() || $this->has($className = $method->getRequestType()->getSingular())) {
+        if (!$method->hasRequestType() || $this->has($className = $method->getRequestType()->getSingular())) {
             return $this;
         }
 
@@ -314,8 +337,8 @@ class TypeRegistrar
 
         foreach ($class->getMethods() as $method) {
             if ($method->isPublic()
-                && ! is_null($field = $this->requestMethodCodeGenType($method))
-                && isset(static::REQUEST_METHODS[$field])) {
+                && !is_null($field = $this->requestMethodCodeGenType($method))
+                && isset($this->request_properties[$field])) {
                 $fields[$field] = new Field(
                     $field,
                     ($methodDeclaration = $this->resolver->fromReflectionMethod($method))->allowedTypes,
@@ -370,10 +393,35 @@ class TypeRegistrar
     {
         if ($method->getDocComment() === false
             || empty($codeGenTags = $this->docBlockReader->create($method->getDocComment())->getTagsByName('code-gen'))
-            || ! (($tag = $codeGenTags[0]) instanceof CodeGenTag)) {
+            || !(($tag = $codeGenTags[0]) instanceof CodeGenTag)) {
             return null;
         }
 
         return (string) $tag->getDescription();
+    }
+
+    /**
+     * @param  array  $request_properties
+     * @return string[]
+     */
+    private function parseRequestProperties(array $request_properties): array
+    {
+        $properties = [];
+
+        foreach ($request_properties as $key => $property) {
+            if (!is_string($property)) {
+                throw new InvalidArgumentException("Request Property value must be a string");
+            }
+
+            if (is_numeric($key)) {
+                $properties[$property] = $property;
+
+                continue;
+            }
+
+            $properties[$key] = $property;
+        }
+
+        return $properties;
     }
 }

@@ -2,6 +2,7 @@
 
 namespace JPNut\Tests;
 
+use Illuminate\Support\Facades\Artisan;
 use JPNut\CodeGen\Generator;
 use Illuminate\Support\Facades\File;
 
@@ -41,6 +42,28 @@ class GeneratorTest extends TestCase
             ->andReturn(true);
 
         $this->assertEquals(true, $generator->generate()->writeToFile('result.ts'));
+    }
+
+    /**
+     * @test
+     */
+    public function it_can_write_to_file_from_command()
+    {
+        $expected = str_replace(
+            '{{ Schema }}',
+            $this->expectedResult(),
+            $stub = file_get_contents($stubFile = config('typescript-codegen.stub'))
+        );
+
+        File::shouldReceive('get')
+            ->with($stubFile)
+            ->andReturn($stub);
+
+        File::shouldReceive('put')
+            ->with('result.ts', $expected)
+            ->andReturn(true);
+
+        Artisan::call('code-gen:generate', ['file' => 'result.ts']);
     }
 
     protected function setUp(): void
@@ -119,16 +142,6 @@ class GeneratorTest extends TestCase
             '  body: JPNutTestsDTOsUpdateFooDTO;',
             '}',
             '',
-            'export interface JPNutTestsDTOsBarRequestParamsDTO {',
-            '  count: number;',
-            '  filter: string;',
-            '  sort: string[];',
-            '}',
-            '',
-            'export interface JPNutTestsRequestsQueryParamsRequest {',
-            '  queryParams: JPNutTestsDTOsBarRequestParamsDTO;',
-            '}',
-            '',
             "export const fooIndexRequest = (): Promise<JPNutTestsDTOsFooIndexDTO> => request({ uri: `http://localhost/foo`, method: 'GET' });",
             '',
             "export const fooFetchRequest = (foo: string): Promise<JPNutTestsDTOsFooDTO> => request({ uri: `http://localhost/foo/\${foo}`, method: 'GET' });",
@@ -142,8 +155,6 @@ class GeneratorTest extends TestCase
             "export const barOptionalScalarRequest = (): Promise<string | null> => request({ uri: `http://localhost/bar/optional-scalar-return-type`, method: 'GET' });",
             '',
             "export const barOptionalParameterRequest = (id?: string): Promise<number | null> => request({ uri: `http://localhost/bar/\${!isNil(id)?id:\"\"}`, method: 'GET' });",
-            '',
-            "export const barQueryParamsRequest = ({ queryParams }: JPNutTestsRequestsQueryParamsRequest): Promise<any> => request({ uri: `http://localhost/bar/query-params`, method: 'GET', queryParams });",
             '',
             "export const barHttpOnlyRequest = (): Promise<string | null> => request({ uri: `http://localhost/bar/http-only`, method: 'GET' });",
             '',

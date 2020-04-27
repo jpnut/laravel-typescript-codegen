@@ -3,7 +3,6 @@
 namespace JPNut\Tests\Controllers;
 
 use Illuminate\Http\Request;
-use JPNut\Tests\Requests\QueryParamsRequest;
 
 class BarController
 {
@@ -34,15 +33,6 @@ class BarController
     public function optionalParameter(Request $request, ?int $id): ?int
     {
         return $id;
-    }
-
-    /**
-     * @param  \JPNut\Tests\Requests\QueryParamsRequest  $request
-     * @return mixed
-     * @code-gen
-     */
-    public function queryParams(QueryParamsRequest $request)
-    {
     }
 
     /**

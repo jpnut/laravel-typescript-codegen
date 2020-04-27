@@ -16,8 +16,6 @@ Route::get('/bar/optional-scalar-return-type', BarController::class.'@optionalSc
     ->name('bar.optional-scalar');
 Route::get('/bar/{?id}', BarController::class.'@optionalParameter')
     ->name('bar.optional-parameter');
-Route::get('/bar/query-params', BarController::class.'@queryParams')
-    ->name('bar.query-params');
 Route::get('/bar/http-only', ['http', 'uses' => BarController::class.'@httpOnly'])
     ->name('bar.http-only');
 Route::get('/bar/https-only', ['https', 'uses' => BarController::class.'@httpsOnly'])

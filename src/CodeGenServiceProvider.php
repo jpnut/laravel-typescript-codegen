@@ -4,6 +4,7 @@ namespace JPNut\CodeGen;
 
 use Illuminate\Routing\Router;
 use Illuminate\Support\ServiceProvider;
+use JPNut\CodeGen\Commands\Generate;
 use phpDocumentor\Reflection\DocBlockFactory;
 use JPNut\CodeGen\Contracts\MethodWriterContract;
 use Illuminate\Contracts\Support\DeferrableProvider;
@@ -16,6 +17,10 @@ class CodeGenServiceProvider extends ServiceProvider implements DeferrableProvid
         $this->publishes([
             __DIR__.'/../config/typescript-codegen.php' => config_path('typescript-codegen.php'),
         ], 'config');
+
+        $this->commands([
+            Generate::class,
+        ]);
     }
 
     public function register()
@@ -25,20 +30,20 @@ class CodeGenServiceProvider extends ServiceProvider implements DeferrableProvid
             'typescript-codegen'
         );
 
-        $config = config('typescript-codegen.writers');
+        $config = config('typescript-codegen');
 
         $docBlockReader = DocBlockFactory::createInstance(['code-gen' => CodeGenTag::class]);
 
-        $registrar = new TypeRegistrar($docBlockReader);
-        $this->app->singleton(TypeRegistrar::class, fn () => $registrar);
+        $registrar = new TypeRegistrar($docBlockReader, $config['request_properties']);
+        $this->app->singleton(TypeRegistrar::class, fn() => $registrar);
 
-        $interfaceWriter = $this->app->make($config['interface']);
-        $this->app->bind(InterfaceWriterContract::class, fn () => $interfaceWriter);
+        $interfaceWriter = $this->app->make($config['writers']['interface']);
+        $this->app->bind(InterfaceWriterContract::class, fn() => $interfaceWriter);
 
-        $methodWriter = $this->app->make($config['method']);
-        $this->app->bind(MethodWriterContract::class, fn () => $methodWriter);
+        $methodWriter = $this->app->make($config['writers']['method']);
+        $this->app->bind(MethodWriterContract::class, fn() => $methodWriter);
 
-        $this->app->bind(Generator::class, fn () => new Generator(
+        $this->app->bind(Generator::class, fn() => new Generator(
             $this->app->make(Router::class),
             $registrar,
             $interfaceWriter,

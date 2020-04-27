@@ -163,13 +163,13 @@ class MethodWriter
 
         $method = in_array('GET', $route->methods) ? 'GET' : $route->methods[0];
 
-        $properties = array_merge([
+        $properties = [
             'uri'    => "`{$uri}`",
             'method' => "'{$method}'",
-        ], $fields);
+        ];
 
-        if (isset($properties['body'])) {
-            $properties['body'] = 'JSON.stringify(body)';
+        foreach ($fields as $field) {
+            $properties[$field] = $this->registrar->requestPropertyValue($field);
         }
 
         return "request({ {$this->propertiesToString($properties)} })";

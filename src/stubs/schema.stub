@@ -1,65 +1,6 @@
-const isNil = (param: any) => param === undefined || param === null;
-
 interface RequestArgs extends RequestInit {
   uri: RequestInfo;
-  queryParams: { [key: string]: any };
 }
-
-const strictUriEncode = (string: string) =>
-  encodeURIComponent(string).replace(/[!'()*]/g, (x) => `%${x.charCodeAt(0).toString(16).toUpperCase()}`);
-
-const encode = (value: string) => {
-  return strictUriEncode(value);
-};
-
-const queryParamEncoder = (key: string) => (result: string[], value?: string | null) => {
-  if (value === undefined) {
-    return result;
-  }
-
-  if (value === null) {
-    return [...result, encode(key)];
-  }
-
-  return [...result, [encode(key), '=', encode(value)].join('')];
-};
-
-const stringifyQueryParams = (object: { [key: string]: any }): string => {
-  if (!object) {
-    return '';
-  }
-
-  const formatter = queryParamEncoder;
-
-  const objectCopy: { [key: string]: any } = {};
-
-  for (const key of Object.keys(object)) {
-    objectCopy[key] = object[key];
-  }
-
-  const keys = Object.keys(objectCopy).sort();
-
-  return keys
-    .map((key) => {
-      const value = object[key];
-
-      if (value === undefined) {
-        return '';
-      }
-
-      if (value === null) {
-        return encode(key);
-      }
-
-      if (Array.isArray(value)) {
-        return value.reduce(formatter(key), []).join('&');
-      }
-
-      return encode(key) + '=' + encode(value);
-    })
-    .filter((x) => x.length > 0)
-    .join('&');
-};
 
 const defaultOptions = {
   headers: {
@@ -67,9 +8,8 @@ const defaultOptions = {
   },
 };
 
-async function request<T>({ uri, queryParams, ...rest }: RequestArgs): Promise<T> {
+async function request<T>({ uri, ...rest }: RequestArgs): Promise<T> {
   const url = new URL(uri.toString());
-  url.search = new URLSearchParams(stringifyQueryParams(queryParams)).toString();
   const response = await fetch(url.href, {
     ...rest,
     headers: {
