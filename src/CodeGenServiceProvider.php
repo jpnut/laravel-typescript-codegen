@@ -15,7 +15,11 @@ class CodeGenServiceProvider extends ServiceProvider implements DeferrableProvid
     public function boot()
     {
         $this->publishes([
-            __DIR__.'/../config/typescript-codegen.php' => config_path('typescript-codegen.php'),
+            __DIR__.'/../config/typescript-codegen-publish.php' => config_path('typescript-codegen.php'),
+        ], 'config');
+
+        $this->publishes([
+            __DIR__.'/stubs/typescript-codegen-schema.stub' => resource_path('stubs/typescript-codegen-schema.stub'),
         ], 'config');
 
         $this->commands([

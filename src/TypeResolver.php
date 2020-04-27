@@ -157,12 +157,23 @@ class TypeResolver
         return array_values(
             array_filter(
                 array_map(
-                    fn (string $type) => new FieldType(str_replace('?', '', self::$typeMapping[$type] ?? $type)),
+                    fn (string $type) => $this->mapStringToFieldType($type),
                     array_filter($types, fn (?string $type) => ! is_null($type) && $type !== '')
                 ),
                 fn (FieldType $fieldType) => ! is_null($fieldType->getType())
             )
         );
+    }
+
+    /**
+     * @param  string  $type
+     * @return \JPNut\CodeGen\FieldType
+     */
+    protected function mapStringToFieldType(string $type): FieldType
+    {
+        $type = str_replace('?', '', $type);
+
+        return new FieldType(self::$typeMapping[$type] ?? $type);
     }
 
     /**

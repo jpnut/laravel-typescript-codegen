@@ -25,7 +25,7 @@ return [
      * make sure to include a line containing '{{ Schema }}',
      * as this will be used to insert the generated schema.
      */
-    'stub'    =>  __DIR__.'/../src/stubs/schema.stub',
+    'stub'    =>  resource_path('stubs/typescript-codegen-schema.stub'),
 
     /**
      * You can determine which request properties you would like
