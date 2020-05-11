@@ -56,5 +56,5 @@ return [
      */
     'default_literals' => [
         Carbon::class => ['string'],
-    ]
+    ],
 ];
