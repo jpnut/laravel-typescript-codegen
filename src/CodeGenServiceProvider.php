@@ -36,9 +36,13 @@ class CodeGenServiceProvider extends ServiceProvider implements DeferrableProvid
 
         $config = config('typescript-codegen');
 
-        $docBlockReader = DocBlockFactory::createInstance(['code-gen' => CodeGenTag::class]);
+        $docBlockReader = DocBlockFactory::createInstance([
+            'code-gen' => CodeGenTag::class,
+            'code-gen-ignore' => CodeGenIgnoreTag::class,
+            'code-gen-property' => CodeGenPropertyTag::class,
+        ]);
 
-        $registrar = new TypeRegistrar($docBlockReader, $config['request_properties']);
+        $registrar = new TypeRegistrar($docBlockReader, $config['request_properties'], $config['default_literals']);
         $this->app->singleton(TypeRegistrar::class, fn () => $registrar);
 
         $interfaceWriter = $this->app->make($config['writers']['interface']);

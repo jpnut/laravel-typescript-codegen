@@ -10,7 +10,7 @@ class UpdateFooRequest extends FormRequest implements CodeGenRequest
 {
     /**
      * @return \JPNut\Tests\DTOs\UpdateFooDTO
-     * @code-gen body
+     * @code-gen-property body
      */
     public function data(): UpdateFooDTO
     {

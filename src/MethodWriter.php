@@ -164,7 +164,7 @@ class MethodWriter
         $method = in_array('GET', $route->methods) ? 'GET' : $route->methods[0];
 
         $properties = [
-            'uri'    => "`{$uri}`",
+            'method' => "'{$method}'",
             'method' => "'{$method}'",
         ];
 
@@ -172,7 +172,7 @@ class MethodWriter
             $properties[$field] = $this->registrar->requestPropertyValue($field);
         }
 
-        return "request({ {$this->propertiesToString($properties)} })";
+        return "request(`{$uri}`, { {$this->propertiesToString($properties)} })";
     }
 
     /**

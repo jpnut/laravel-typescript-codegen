@@ -94,6 +94,11 @@ class FooDTO
 
     public $unknown_property;
 
+    /**
+     * @code-gen-ignore
+     */
+    public string $ignored_property;
+
     protected string $protected_property;
 
     private string $private_property;

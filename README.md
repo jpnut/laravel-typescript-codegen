@@ -37,7 +37,7 @@ For example, you can turn this:
 into this:
 
 ```typescript
-export const fooDeleteRequest = (foo: string): Promise<bool> => request({ uri: `https://localhost/foo/${foo}`, method: `DELETE` });
+export const fooDeleteRequest = (foo: string): Promise<bool> => request(`https://localhost/foo/${foo}`, { method: `DELETE` });
 ```
 
 ## Installation
@@ -107,6 +107,8 @@ interface Token {
 }
 ```
 
+### Working with Requests
+
 Generating types for request properties (e.g. the request body) is slightly more involved. The request must implement `JPNut\CodeGen\Contracts\CodeGenRequest`, and should be resolvable by Laravel's Service Container (typically this means extending `Illuminate\Foundation\Http\FormRequest`). You should then create and tag methods which create a mapping from the request to the desired type. For example:
 
 ```php
@@ -117,7 +119,7 @@ Generating types for request properties (e.g. the request body) is slightly more
 class UpdateUserRequest extends FormRequest
 {
     /**
-     * @code-gen body
+     * @code-gen-property body
      */
     public function data(): UpdateUserParams
     {
@@ -156,7 +158,52 @@ interface UpdateUserParams {
   age?: number | null;
 }
 
-export const fooUpdateRequest = ({ body }: UpdateUserRequest, foo: string): Promise<any> => request({ uri: `http://localhost/foo/${foo}`, method: 'PUT', body: JSON.stringify(body) });
+export const fooUpdateRequest = ({ body }: UpdateUserRequest, foo: string): Promise<any> => request(`http://localhost/foo/${foo}`, { method: 'PUT', body: JSON.stringify(body) });
 ```
 
-Note that the body parameter is serialised for the request automatically. This can be changed by modifying the config property "request_properties".
+Note that the body parameter is serialised for the request automatically. You can change this or serialise other properties by modifying the `request_properties` config property.
+
+### Ignoring Properties
+
+You may have public properties which you do not wish to generate types for. Properties can be ignored by including the `@code-gen-ignore` tag:
+
+```php
+class Foo {
+    /**
+     * @code-gen-ignore
+     */
+    public string $ignored_property;
+}
+```
+
+### Using a custom stub
+
+By default, this package will generate the schema using a stub. This stub contains a `request` method which is a wrapper for the fetch api and returns a promise containing the deserialised response data.
+
+If you wish to customise this stub, you should first publish the config file
+
+```shell script
+php artisan vendor:publish --provider="JPNut\CodeGen\CodeGenServiceProvider" --tag="config"
+```
+
+This will also create a copy of the default stub file located at `resource_path('stubs/typescript-codegen-schema.stub')`. This file will then be used to generate the schema.
+
+### Using a custom interface/method writer
+
+You may wish to change the generated output for interfaces and methods. For example, you might decide to rename the `request` method within the stub. In this case, you should create your own Interface or Method writer and replace the included writer(s) with your version in the `writers` array of the config. The writer(s) should implement the `JPNut\CodeGen\Contracts\InterfaceWriterContract` and `JPNut\CodeGen\Contracts\MethodWriterContract` interfaces respectively.
+
+### Override class resolution
+
+You may wish to resolve certain classes into literals. This is particularly useful for classes which are not part of your codebase. To achieve this, include the class in the `default_literals` array of the config. The class name should be the key, and the value should be an array of php literal types (e.g. string, int etc.)
+
+For example, by default this package converts the `Carbon\Carbon` class into a string. This is necessary since the return type of the `jsonSerialize` method of the class is `string|array`.
+
+## Testing
+
+```shell script
+vendor/bin/phpunit
+```
+
+## License
+
+The MIT License (MIT). Please see [License File](LICENSE) for more information.

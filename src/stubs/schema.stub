@@ -1,20 +1,17 @@
-interface RequestArgs extends RequestInit {
-  uri: RequestInfo;
-}
-
 const defaultOptions = {
   headers: {
     'Content-Type': 'application/json',
   },
 };
 
-async function request<T>({ uri, ...rest }: RequestArgs): Promise<T> {
-  const url = new URL(uri.toString());
-  const response = await fetch(url.href, {
-    ...rest,
+const isNil = (arg: any) => arg === undefined || arg === null;
+
+async function request<T>(uri: string, args: RequestInit): Promise<T> {
+  const response = await fetch(uri, {
+    ...args,
     headers: {
       ...defaultOptions.headers,
-      ...rest.headers,
+      ...args.headers,
     },
   });
   const body = await response.json();

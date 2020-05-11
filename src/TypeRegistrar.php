@@ -2,8 +2,8 @@
 
 namespace JPNut\CodeGen;
 
-use Carbon\Carbon;
 use ReflectionClass;
+use ReflectionProperty;
 use JsonSerializable;
 use ReflectionMethod;
 use Illuminate\Routing\Route;
@@ -14,44 +14,47 @@ use phpDocumentor\Reflection\DocBlockFactory;
 
 class TypeRegistrar
 {
-    private const DEFAULT_LITERALS = [
-        Carbon::class => ['string'],
-    ];
-
     /**
      * @var \JPNut\CodeGen\Contracts\Type[]
      */
-    private array $types = [];
+    protected array $types = [];
 
     /**
      * @var \JPNut\CodeGen\Method[]
      */
-    private array $methods = [];
+    protected array $methods = [];
 
     /**
      * @var \phpDocumentor\Reflection\DocBlockFactory
      */
-    private DocBlockFactory $docBlockReader;
+    protected DocBlockFactory $docBlockReader;
 
     /**
      * @var \JPNut\CodeGen\TypeResolver
      */
-    private TypeResolver $resolver;
+    protected TypeResolver $resolver;
 
     /**
      * @var string[]
      */
-    private array $request_properties;
+    protected array $request_properties;
+
+    /**
+     * @var array
+     */
+    private array $default_literals;
 
     /**
      * @param  \phpDocumentor\Reflection\DocBlockFactory  $docBlockReader
      * @param  array  $request_properties
+     * @param  array  $default_literals
      */
-    public function __construct(DocBlockFactory $docBlockReader, array $request_properties)
+    public function __construct(DocBlockFactory $docBlockReader, array $request_properties, array $default_literals)
     {
         $this->docBlockReader = $docBlockReader;
         $this->resolver = new TypeResolver($docBlockReader);
         $this->request_properties = $this->parseRequestProperties($request_properties);
+        $this->default_literals = $default_literals;
 
         $this->addDefaultTypes();
     }
@@ -120,8 +123,8 @@ class TypeRegistrar
          */
         $this->addType($interface = new Interface_($name));
 
-        foreach ($class->getProperties() as $property) {
-            if (! $property->isPublic()) {
+        foreach ($class->getProperties(ReflectionProperty::IS_PUBLIC) as $property) {
+            if ($this->shouldIgnoreProperty($property)) {
                 continue;
             }
 
@@ -241,7 +244,7 @@ class TypeRegistrar
      * @param  \JPNut\CodeGen\TypeDeclaration  $declaration
      * @param  string  $name
      */
-    private function generateDeclarationSubTypes(TypeDeclaration $declaration, string $name): void
+    protected function generateDeclarationSubTypes(TypeDeclaration $declaration, string $name): void
     {
         foreach ($declaration->allowedTypes as $allowedType) {
             if ($allowedType->isClass() && (($class = $allowedType->getSingular()) !== $name)) {
@@ -259,9 +262,9 @@ class TypeRegistrar
     /**
      * @return \JPNut\CodeGen\TypeRegistrar
      */
-    private function addDefaultTypes(): self
+    protected function addDefaultTypes(): self
     {
-        foreach (static::DEFAULT_LITERALS as $name => $types) {
+        foreach ($this->default_literals as $name => $types) {
             $this->addType(new Literal(
                 $name,
                 array_map(fn (string $type) => new FieldType($type), $types)
@@ -275,7 +278,7 @@ class TypeRegistrar
      * @param  \JPNut\CodeGen\Method  $method
      * @return \JPNut\CodeGen\TypeRegistrar
      */
-    private function generateMethodTypes(Method $method): self
+    protected function generateMethodTypes(Method $method): self
     {
         return $this->addMethodRequestType($method)
             ->addMethodReturnTypes($method);
@@ -285,7 +288,7 @@ class TypeRegistrar
      * @param  \JPNut\CodeGen\Method  $method
      * @return \JPNut\CodeGen\TypeRegistrar
      */
-    private function addMethodReturnTypes(Method $method): self
+    protected function addMethodReturnTypes(Method $method): self
     {
         foreach ($method->getReturnTypes() as $returnType) {
             if (! $returnType->isClass()) {
@@ -302,7 +305,7 @@ class TypeRegistrar
      * @param  \ReflectionClass  $class
      * @return bool
      */
-    private function classIsSerializable(ReflectionClass $class): bool
+    protected function classIsSerializable(ReflectionClass $class): bool
     {
         return isset(class_implements($class->getName())[JsonSerializable::class]);
     }
@@ -311,7 +314,7 @@ class TypeRegistrar
      * @param  \JPNut\CodeGen\Method  $method
      * @return \JPNut\CodeGen\TypeRegistrar
      */
-    private function addMethodRequestType(Method $method): self
+    protected function addMethodRequestType(Method $method): self
     {
         if (! $method->hasRequestType() || $this->has($className = $method->getRequestType()->getSingular())) {
             return $this;
@@ -331,7 +334,7 @@ class TypeRegistrar
      * @param  \ReflectionClass  $class
      * @return \JPNut\CodeGen\Field[]
      */
-    private function getRequestMethodFields(ReflectionClass $class): array
+    protected function getRequestMethodFields(ReflectionClass $class): array
     {
         $fields = [];
 
@@ -357,7 +360,7 @@ class TypeRegistrar
      * @param  \ReflectionMethod  $reflectionMethod
      * @return \JPNut\CodeGen\Method
      */
-    private function createMethod(Route $route, ReflectionMethod $reflectionMethod): Method
+    protected function createMethod(Route $route, ReflectionMethod $reflectionMethod): Method
     {
         return new Method(
             $route,
@@ -371,7 +374,7 @@ class TypeRegistrar
      * @param  string  $requestType
      * @return bool
      */
-    private function isCodeGenRequest(string $requestType): bool
+    protected function isCodeGenRequest(string $requestType): bool
     {
         return isset(class_implements($requestType)[CodeGenRequest::class]);
     }
@@ -380,7 +383,7 @@ class TypeRegistrar
      * @param  string  $type
      * @return \JPNut\CodeGen\FieldType
      */
-    private function createFieldType(string $type): FieldType
+    protected function createFieldType(string $type): FieldType
     {
         return new FieldType($type);
     }
@@ -389,11 +392,11 @@ class TypeRegistrar
      * @param  \ReflectionMethod  $method
      * @return string|null
      */
-    private function requestMethodCodeGenType(ReflectionMethod $method): ?string
+    protected function requestMethodCodeGenType(ReflectionMethod $method): ?string
     {
         if ($method->getDocComment() === false
-            || empty($codeGenTags = $this->docBlockReader->create($method->getDocComment())->getTagsByName('code-gen'))
-            || ! (($tag = $codeGenTags[0]) instanceof CodeGenTag)) {
+            || empty($codeGenTags = $this->docBlockReader->create($method->getDocComment())->getTagsByName('code-gen-property'))
+            || ! (($tag = $codeGenTags[0]) instanceof CodeGenPropertyTag)) {
             return null;
         }
 
@@ -404,7 +407,7 @@ class TypeRegistrar
      * @param  array  $request_properties
      * @return string[]
      */
-    private function parseRequestProperties(array $request_properties): array
+    protected function parseRequestProperties(array $request_properties): array
     {
         $properties = [];
 
@@ -423,5 +426,20 @@ class TypeRegistrar
         }
 
         return $properties;
+    }
+
+    /**
+     * @param  \ReflectionProperty  $property
+     * @return bool
+     */
+    protected function shouldIgnoreProperty(ReflectionProperty $property): bool
+    {
+        if ($property->getDocComment() === false
+            || empty($codeGenTags = $this->docBlockReader->create($property->getDocComment())->getTagsByName('code-gen-ignore'))
+            || ! (($tag = $codeGenTags[0]) instanceof CodeGenIgnoreTag)) {
+            return false;
+        }
+
+        return true;
     }
 }

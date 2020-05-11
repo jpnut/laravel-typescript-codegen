@@ -1,5 +1,6 @@
 <?php
 
+use Carbon\Carbon;
 use JPNut\CodeGen\MethodWriter;
 use JPNut\CodeGen\InterfaceWriter;
 
@@ -44,4 +45,16 @@ return [
     'request_properties' => [
         'body' => 'JSON.stringify(body)',
     ],
+
+    /**
+     * You may wish to manually resolve certain classes into
+     * pre-determined types. For example, typically the Carbon
+     * class would be transformed into a type of string|array
+     * based on the return type of the jsonSerialize method.
+     * However, typically we only serialize dates to a string
+     * format, we override the generated type here.
+     */
+    'default_literals' => [
+        Carbon::class => ['string'],
+    ]
 ];
