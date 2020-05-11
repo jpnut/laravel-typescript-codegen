@@ -3,9 +3,9 @@
 namespace JPNut\CodeGen;
 
 use ReflectionClass;
-use ReflectionProperty;
 use JsonSerializable;
 use ReflectionMethod;
+use ReflectionProperty;
 use Illuminate\Routing\Route;
 use InvalidArgumentException;
 use JPNut\CodeGen\Contracts\Type;
