@@ -92,6 +92,11 @@ class FooDTO
      */
     public SerializableDTO $serializable_object;
 
+    /**
+     * @var \JPNut\Tests\DTOs\IteratorDTO
+     */
+    public IteratorDTO $iterator_object;
+
     public $unknown_property;
 
     /**

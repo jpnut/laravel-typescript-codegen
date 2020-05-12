@@ -19,6 +19,11 @@ class FieldType
     /**
      * @var string|null
      */
+    private ?string $raw_type;
+
+    /**
+     * @var string|null
+     */
     private ?string $type;
 
     /**
@@ -31,6 +36,8 @@ class FieldType
      */
     public function __construct(?string $type)
     {
+        $this->raw_type = $type;
+
         $type = static::$typeMapping[$type] ?? $type;
 
         $this->type = $type;
@@ -77,9 +84,9 @@ class FieldType
     /**
      * @return string|null
      */
-    public function getSingular(): ?string
+    public function getRawType(): ?string
     {
-        return $this->singular;
+        return $this->raw_type;
     }
 
     /**
@@ -88,5 +95,13 @@ class FieldType
     public function getType(): ?string
     {
         return $this->type;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getSingular(): ?string
+    {
+        return $this->singular;
     }
 }
