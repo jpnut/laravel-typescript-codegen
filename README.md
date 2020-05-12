@@ -37,7 +37,7 @@ For example, you can turn this:
 into this:
 
 ```typescript
-export const fooDeleteRequest = (foo: string): Promise<bool> => request(`https://localhost/foo/${foo}`, { method: `DELETE` });
+export const fooDeleteRequest = (foo: string, options?: RequestInit) => request<bool>(`https://localhost/foo/${foo}`, { method: `DELETE`, ...options });
 ```
 
 ## Installation
@@ -158,7 +158,7 @@ interface UpdateUserParams {
   age?: number | null;
 }
 
-export const fooUpdateRequest = ({ body }: UpdateUserRequest, foo: string): Promise<any> => request(`http://localhost/foo/${foo}`, { method: 'PUT', body: JSON.stringify(body) });
+export const fooUpdateRequest = ({ body }: UpdateUserRequest, foo: string, options?: RequestInit) => request<any>(`http://localhost/foo/${foo}`, { method: 'PUT', body: JSON.stringify(body), ...options });
 ```
 
 Note that the body parameter is serialised for the request automatically. You can change this or serialise other properties by modifying the `request_properties` config property.
