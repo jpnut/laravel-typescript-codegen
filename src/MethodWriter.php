@@ -48,10 +48,9 @@ class MethodWriter
             'export const ',
             $this->routeToMethodName($route = $method->getRoute()),
             ' = ',
-            "({$this->functionParameters($method, $route, $fields = $this->functionFields($method))}): ",
-            "Promise<{$this->formatReturnType($method)}>",
+            "({$this->functionParameters($method, $route, $fields = $this->functionFields($method))})",
             ' => ',
-            $this->routeToFunctionCall($route, $fields),
+            $this->routeToFunctionCall($method, $route, $fields),
             ';',
         ]);
     }
@@ -80,6 +79,7 @@ class MethodWriter
         return implode(', ', array_filter([
             $this->requestParameters($method, $fields),
             ...$this->routeParameters($route),
+            'options?: RequestInit',
         ]));
     }
 
@@ -150,29 +150,29 @@ class MethodWriter
     }
 
     /**
+     * @param  \JPNut\CodeGen\Method  $method
      * @param  \Illuminate\Routing\Route  $route
      * @param  string[]  $fields
      * @return string
      */
-    protected function routeToFunctionCall(Route $route, array $fields): string
+    protected function routeToFunctionCall(Method $method, Route $route, array $fields): string
     {
         $uri = $this->generator->to(
             $route,
             array_map(fn (RouteParameter $rp) => $rp->toUriComponent(), $this->parameters($route))
         );
 
-        $method = in_array('GET', $route->methods) ? 'GET' : $route->methods[0];
+        $http_method = in_array('GET', $route->methods) ? 'GET' : $route->methods[0];
 
         $properties = [
-            'method' => "'{$method}'",
-            'method' => "'{$method}'",
+            'method' => "'{$http_method}'",
         ];
 
         foreach ($fields as $field) {
             $properties[$field] = $this->registrar->requestPropertyValue($field);
         }
 
-        return "request(`{$uri}`, { {$this->propertiesToString($properties)} })";
+        return "request<{$this->formatReturnType($method)}>(`{$uri}`, { {$this->propertiesToString($properties)} })";
     }
 
     /**
@@ -183,6 +183,7 @@ class MethodWriter
     {
         return collect($properties)
             ->map(fn ($value, $key) => $key === $value ? $key : "{$key}: {$value}")
+            ->push("...options")
             ->join(', ');
     }
 
