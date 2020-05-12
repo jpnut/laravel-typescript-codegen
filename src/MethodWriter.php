@@ -183,7 +183,7 @@ class MethodWriter
     {
         return collect($properties)
             ->map(fn ($value, $key) => $key === $value ? $key : "{$key}: {$value}")
-            ->push("...options")
+            ->push('...options')
             ->join(', ');
     }
 
