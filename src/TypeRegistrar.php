@@ -2,6 +2,7 @@
 
 namespace JPNut\CodeGen;
 
+use Iterator;
 use ReflectionClass;
 use JsonSerializable;
 use ReflectionMethod;
@@ -109,13 +110,11 @@ class TypeRegistrar
         }
 
         if ($this->classIsSerializable($class)) {
-            $methodDeclaration = $this->resolver->fromReflectionMethod(
-                $class->getMethod('jsonSerialize'),
-            );
+            return $this->addSerializableType($class, $name);
+        }
 
-            $this->addType(new Literal($name, $methodDeclaration->allowedTypes));
-
-            return $name;
+        if ($this->classIsIterator($class)) {
+            return $this->addIteratorType($class, $name);
         }
 
         /**
@@ -308,6 +307,61 @@ class TypeRegistrar
     protected function classIsSerializable(ReflectionClass $class): bool
     {
         return isset(class_implements($class->getName())[JsonSerializable::class]);
+    }
+
+    /**
+     * @param  \ReflectionClass  $class
+     * @param  string  $name
+     * @return string
+     */
+    protected function addSerializableType(ReflectionClass $class, string $name): string
+    {
+        $methodDeclaration = $this->resolver->fromReflectionMethod(
+            $class->getMethod('jsonSerialize'),
+        );
+
+        $this->generateDeclarationSubTypes($methodDeclaration, $name);
+
+        $this->addType(new Literal($name, $methodDeclaration->allowedTypes));
+
+        return $name;
+    }
+
+    /**
+     * @param  \ReflectionClass  $class
+     * @return bool
+     */
+    protected function classIsIterator(ReflectionClass $class): bool
+    {
+        return isset(class_implements($class->getName())[Iterator::class]);
+    }
+
+    /**
+     * @param  \ReflectionClass  $class
+     * @param  string  $name
+     * @return string
+     */
+    protected function addIteratorType(ReflectionClass $class, string $name): string
+    {
+        $methodDeclaration = $this->resolver->fromReflectionMethod(
+            $class->getMethod('current'),
+        );
+
+        $this->generateDeclarationSubTypes($methodDeclaration, $name);
+
+        $this->addType(
+            new Literal(
+                $name,
+                array_map(
+                    fn (FieldType $type) => new FieldType(
+                        is_null($type->getRawType()) ? null : "{$type->getRawType()}[]"
+                    ),
+                    $methodDeclaration->allowedTypes
+                )
+            )
+        );
+
+        return $name;
     }
 
     /**
