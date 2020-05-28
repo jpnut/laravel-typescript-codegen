@@ -1,15 +1,15 @@
 <?php
 
-namespace JPNut\Tests\Requests;
+namespace JPNut\CodeGen\Tests\Requests;
 
-use JPNut\Tests\DTOs\UpdateFooDTO;
+use JPNut\CodeGen\Tests\DTOs\UpdateFooDTO;
 use Illuminate\Foundation\Http\FormRequest;
 use JPNut\CodeGen\Contracts\CodeGenRequest;
 
 class UpdateFooRequest extends FormRequest implements CodeGenRequest
 {
     /**
-     * @return \JPNut\Tests\DTOs\UpdateFooDTO
+     * @return \JPNut\CodeGen\Tests\DTOs\UpdateFooDTO
      * @code-gen-property body
      */
     public function data(): UpdateFooDTO

@@ -1,6 +1,6 @@
 <?php
 
-namespace JPNut\Tests\DTOs;
+namespace JPNut\CodeGen\Tests\DTOs;
 
 class FooDTO
 {
@@ -73,12 +73,12 @@ class FooDTO
     public $soft_object;
 
     /**
-     * @var \JPNut\Tests\DTOs\FooDTO
+     * @var \JPNut\CodeGen\Tests\DTOs\FooDTO
      */
     public $soft_child;
 
     /**
-     * @var \JPNut\Tests\DTOs\FooDTO|null
+     * @var \JPNut\CodeGen\Tests\DTOs\FooDTO|null
      */
     public $soft_nullable_child;
 
@@ -88,12 +88,12 @@ class FooDTO
     public $number;
 
     /**
-     * @var \JPNut\Tests\DTOs\SerializableDTO
+     * @var \JPNut\CodeGen\Tests\DTOs\SerializableDTO
      */
     public SerializableDTO $serializable_object;
 
     /**
-     * @var \JPNut\Tests\DTOs\IteratorDTO
+     * @var \JPNut\CodeGen\Tests\DTOs\IteratorDTO
      */
     public IteratorDTO $iterator_object;
 

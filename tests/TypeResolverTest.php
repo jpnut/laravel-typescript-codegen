@@ -1,6 +1,6 @@
 <?php
 
-namespace JPNut\Tests;
+namespace JPNut\CodeGen\Tests;
 
 use JPNut\CodeGen\FieldType;
 use JPNut\CodeGen\TypeResolver;

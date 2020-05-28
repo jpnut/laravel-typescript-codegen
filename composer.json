@@ -28,7 +28,7 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "JPNut\\Tests\\": "tests"
+            "JPNut\\CodeGen\\Tests\\": "tests"
         }
     },
     "extra": {

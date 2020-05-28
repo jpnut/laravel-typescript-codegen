@@ -1,8 +1,8 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use JPNut\Tests\Controllers\BarController;
-use JPNut\Tests\Controllers\FooController;
+use JPNut\CodeGen\Tests\Controllers\BarController;
+use JPNut\CodeGen\Tests\Controllers\FooController;
 
 Route::get('/foo', FooController::class.'@index')->name('foo.index');
 Route::get('/foo/{foo}', FooController::class.'@fetch')->name('foo.fetch');

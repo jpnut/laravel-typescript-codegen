@@ -1,6 +1,6 @@
 <?php
 
-namespace JPNut\Tests\DTOs;
+namespace JPNut\CodeGen\Tests\DTOs;
 
 class UpdateFooDTO extends FooDTO
 {

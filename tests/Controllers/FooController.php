@@ -1,11 +1,11 @@
 <?php
 
-namespace JPNut\Tests\Controllers;
+namespace JPNut\CodeGen\Tests\Controllers;
 
 use Illuminate\Http\Request;
-use JPNut\Tests\DTOs\FooDTO;
-use JPNut\Tests\DTOs\FooIndexDTO;
-use JPNut\Tests\Requests\UpdateFooRequest;
+use JPNut\CodeGen\Tests\DTOs\FooDTO;
+use JPNut\CodeGen\Tests\DTOs\FooIndexDTO;
+use JPNut\CodeGen\Tests\Requests\UpdateFooRequest;
 
 class FooController
 {
@@ -20,7 +20,7 @@ class FooController
     /**
      * @param  \Illuminate\Http\Request  $request
      * @param  int  $foo
-     * @return \JPNut\Tests\DTOs\FooDTO
+     * @return \JPNut\CodeGen\Tests\DTOs\FooDTO
      * @code-gen
      */
     public function fetch(Request $request, int $foo): FooDTO
