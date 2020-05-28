@@ -1,6 +1,6 @@
 <?php
 
-namespace JPNut\Tests\Controllers;
+namespace JPNut\CodeGen\Tests\Controllers;
 
 use Illuminate\Http\Request;
 
