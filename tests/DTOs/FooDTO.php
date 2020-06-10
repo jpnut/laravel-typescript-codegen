@@ -97,6 +97,18 @@ class FooDTO
      */
     public IteratorDTO $iterator_object;
 
+    public ?self $nullable_self;
+
+    /**
+     * @var self|null
+     */
+    public $soft_nullable_self;
+
+    /**
+     * @var static|null
+     */
+    public $soft_nullable_static;
+
     public $unknown_property;
 
     /**

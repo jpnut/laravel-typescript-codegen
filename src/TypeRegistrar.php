@@ -127,7 +127,7 @@ class TypeRegistrar
                 continue;
             }
 
-            $propertyDeclaration = $this->resolver->fromReflectionProperty($property);
+            $propertyDeclaration = $this->resolver->fromReflectionProperty($property, $class);
 
             $interface->addField(
                 new Field(

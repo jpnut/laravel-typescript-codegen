@@ -2,13 +2,15 @@
 
 namespace JPNut\CodeGen;
 
-use ReflectionType;
+use Illuminate\Support\Str;
+use InvalidArgumentException;
+use phpDocumentor\Reflection\DocBlock\Tags\Return_;
+use phpDocumentor\Reflection\DocBlock\Tags\Var_;
+use phpDocumentor\Reflection\DocBlockFactory;
+use ReflectionClass;
 use ReflectionMethod;
 use ReflectionProperty;
-use Illuminate\Support\Str;
-use phpDocumentor\Reflection\DocBlockFactory;
-use phpDocumentor\Reflection\DocBlock\Tags\Var_;
-use phpDocumentor\Reflection\DocBlock\Tags\Return_;
+use ReflectionType;
 
 class TypeResolver
 {
@@ -27,6 +29,10 @@ class TypeResolver
      */
     private DocBlockFactory $docBlockReader;
 
+    private ?ReflectionProperty $property = null;
+
+    private ?ReflectionClass $class = null;
+
     /**
      * @param  \phpDocumentor\Reflection\DocBlockFactory  $docBlockReader
      */
@@ -37,9 +43,10 @@ class TypeResolver
 
     /**
      * @param  \ReflectionProperty  $property
+     * @param  \ReflectionClass  $class
      * @return \JPNut\CodeGen\TypeDeclaration
      */
-    public function fromReflectionProperty(ReflectionProperty $property): TypeDeclaration
+    public function fromReflectionProperty(ReflectionProperty $property, ReflectionClass $class): TypeDeclaration
     {
         /**
          * If there is no doc comment, or the doc comment does not contain the appropriate tag,
@@ -47,16 +54,20 @@ class TypeResolver
          */
         if ($property->getDocComment() === false
             || empty($varTags = $this->docBlockReader->create($property->getDocComment())->getTagsByName('var'))
-            || ! (($tag = $varTags[0]) instanceof Var_)) {
+            || !(($tag = $varTags[0]) instanceof Var_)) {
             return $this->resolve(
                 is_null($property->getType())
                     ? null
-                    : $this->reflectionTypeToDefinition($property->getType())
+                    : $this->reflectionTypeToDefinition($property->getType()),
+                $property,
+                $class,
             );
         }
 
         return $this->resolve(
-            (string) $tag->getType() ?? null
+            (string) $tag->getType() ?? null,
+            $property,
+            $class,
         );
     }
 
@@ -72,7 +83,7 @@ class TypeResolver
          */
         if ($method->getDocComment() === false
             || empty($returnTags = $this->docBlockReader->create($method->getDocComment())->getTagsByName('return'))
-            || ! (($tag = $returnTags[0]) instanceof Return_)) {
+            || !(($tag = $returnTags[0]) instanceof Return_)) {
             return $this->resolve(
                 is_null($method->getReturnType())
                     ? null
@@ -87,10 +98,18 @@ class TypeResolver
 
     /**
      * @param  string|null  $definition
+     * @param  \ReflectionProperty|null  $property
+     * @param  \ReflectionClass|null  $class
      * @return \JPNut\CodeGen\TypeDeclaration
      */
-    public function resolve(?string $definition = null): TypeDeclaration
-    {
+    public function resolve(
+        ?string $definition = null,
+        ?ReflectionProperty $property = null,
+        ?ReflectionClass $class = null
+    ): TypeDeclaration {
+        $this->property = $property;
+        $this->class = $class;
+
         $definition ??= '';
 
         $declaration = new TypeDeclaration($definition);
@@ -111,7 +130,7 @@ class TypeResolver
      */
     protected function resolveNullable(string $definition): bool
     {
-        if (! $definition) {
+        if (!$definition) {
             return true;
         }
 
@@ -157,10 +176,10 @@ class TypeResolver
         return array_values(
             array_filter(
                 array_map(
-                    fn (string $type) => $this->mapStringToFieldType($type),
-                    array_filter($types, fn (?string $type) => ! is_null($type) && $type !== '')
+                    fn(string $type) => $this->mapStringToFieldType($type),
+                    array_filter($types, fn(?string $type) => !is_null($type) && $type !== '')
                 ),
-                fn (FieldType $fieldType) => ! is_null($fieldType->getType())
+                fn(FieldType $fieldType) => !is_null($fieldType->getType())
             )
         );
     }
@@ -171,7 +190,7 @@ class TypeResolver
      */
     protected function mapStringToFieldType(string $type): FieldType
     {
-        $type = str_replace('?', '', $type);
+        $type = $this->expandSelfAndStaticTypes(str_replace('?', '', $type));
 
         return new FieldType(self::$typeMapping[$type] ?? $type);
     }
@@ -193,7 +212,7 @@ class TypeResolver
     {
         return $this->normaliseTypes(...array_map(
             function (string $type) {
-                if (! $type) {
+                if (!$type) {
                     return;
                 }
 
@@ -207,6 +226,31 @@ class TypeResolver
             },
             explode('|', $definition)
         ));
+    }
+
+    /**
+     * @param  string  $type
+     * @return string
+     */
+    protected function expandSelfAndStaticTypes(string $type): string
+    {
+        if ($type === 'self') {
+            if (is_null($this->property)) {
+                throw new InvalidArgumentException("Cannot use type 'self' without property reference");
+            }
+
+            return $this->property->getDeclaringClass()->getName();
+        }
+
+        if ($type === 'static') {
+            if (is_null($this->class)) {
+                throw new InvalidArgumentException("Cannot use type 'static' without class reference");
+            }
+
+            return $this->class->getName();
+        }
+
+        return $type;
     }
 
     /**
