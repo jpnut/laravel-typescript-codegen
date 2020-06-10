@@ -234,20 +234,20 @@ class TypeResolver
      */
     protected function expandSelfAndStaticTypes(string $type): string
     {
-        if ($type === 'self') {
+        if ($type === 'self' || $type === 'self[]') {
             if (is_null($this->property)) {
                 throw new InvalidArgumentException("Cannot use type 'self' without property reference");
             }
 
-            return $this->property->getDeclaringClass()->getName();
+            return str_replace('self', $this->property->getDeclaringClass()->getName(), $type);
         }
 
-        if ($type === 'static') {
+        if ($type === 'static' || $type === 'static[]') {
             if (is_null($this->class)) {
                 throw new InvalidArgumentException("Cannot use type 'static' without class reference");
             }
 
-            return $this->class->getName();
+            return str_replace('static', $this->class->getName(), $type);
         }
 
         return $type;

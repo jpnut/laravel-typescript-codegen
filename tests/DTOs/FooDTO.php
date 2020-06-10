@@ -83,6 +83,11 @@ class FooDTO
     public $soft_nullable_child;
 
     /**
+     * @var \JPNut\CodeGen\Tests\DTOs\FooDTO[]|null
+     */
+    public $soft_nullable_child_array;
+
+    /**
      * @var int|float|float
      */
     public $number;
@@ -108,6 +113,16 @@ class FooDTO
      * @var static|null
      */
     public $soft_nullable_static;
+
+    /**
+     * @var self[]|null
+     */
+    public $soft_nullable_self_array;
+
+    /**
+     * @var static[]|null
+     */
+    public $soft_nullable_static_array;
 
     public $unknown_property;
 
