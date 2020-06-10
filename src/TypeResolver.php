@@ -190,9 +190,51 @@ class TypeResolver
      */
     protected function mapStringToFieldType(string $type): FieldType
     {
-        $type = $this->expandSelfAndStaticTypes(str_replace('?', '', $type));
+        return new FieldType($this->normaliseType($type));
+    }
 
-        return new FieldType(self::$typeMapping[$type] ?? $type);
+    /**
+     * @param  string  $type
+     * @return string
+     */
+    protected function normaliseType(string $type): string
+    {
+        $type = str_replace('?', '', $type);
+
+        if (strpos($type, '[]') !== false) {
+            return "{$this->mapNormalisedType(str_replace('[]', '', $type))}[]";
+        }
+
+        if (strpos($type, 'iterable<') !== false) {
+            return "iterable<{$this->mapNormalisedType(str_replace(['iterable<', '>'], ['', ''], $type))}>";
+        }
+
+        return $this->mapNormalisedType($type);
+    }
+
+    /**
+     * @param  string  $type
+     * @return string
+     */
+    protected function mapNormalisedType(string $type): string
+    {
+        if ($type === 'self') {
+            if (is_null($this->property)) {
+                throw new InvalidArgumentException("Cannot use type 'self' without property reference");
+            }
+
+            return $this->property->getDeclaringClass()->getName();
+        }
+
+        if ($type === 'static') {
+            if (is_null($this->class)) {
+                throw new InvalidArgumentException("Cannot use type 'static' without class reference");
+            }
+
+            return $this->class->getName();
+        }
+
+        return self::$typeMapping[$type] ?? $type;
     }
 
     /**
@@ -226,31 +268,6 @@ class TypeResolver
             },
             explode('|', $definition)
         ));
-    }
-
-    /**
-     * @param  string  $type
-     * @return string
-     */
-    protected function expandSelfAndStaticTypes(string $type): string
-    {
-        if ($type === 'self' || $type === 'self[]') {
-            if (is_null($this->property)) {
-                throw new InvalidArgumentException("Cannot use type 'self' without property reference");
-            }
-
-            return str_replace('self', $this->property->getDeclaringClass()->getName(), $type);
-        }
-
-        if ($type === 'static' || $type === 'static[]') {
-            if (is_null($this->class)) {
-                throw new InvalidArgumentException("Cannot use type 'static' without class reference");
-            }
-
-            return str_replace('static', $this->class->getName(), $type);
-        }
-
-        return $type;
     }
 
     /**

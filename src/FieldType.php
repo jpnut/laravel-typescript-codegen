@@ -38,10 +38,36 @@ class FieldType
     {
         $this->raw_type = $type;
 
-        $type = static::$typeMapping[$type] ?? $type;
+        $type = $this->normaliseType($type);
 
         $this->type = $type;
         $this->singular = $this->parseSingularType($type);
+    }
+
+    /**
+     * @param  string|null  $type
+     * @return string|null
+     */
+    private function normaliseType(?string $type): ?string
+    {
+        if (strpos($type, '[]') !== false) {
+            return "{$this->mapNormalisedType(str_replace('[]', '', $type))}[]";
+        }
+
+        if (strpos($type, 'iterable<') !== false) {
+            return "iterable<{$this->mapNormalisedType(str_replace(['iterable<', '>'], ['', ''], $type))}>";
+        }
+
+        return $this->mapNormalisedType($type);
+    }
+
+    /**
+     * @param  string|null  $type
+     * @return string|null
+     */
+    private function mapNormalisedType(?string $type): ?string
+    {
+        return static::$typeMapping[$type] ?? $type;
     }
 
     /**

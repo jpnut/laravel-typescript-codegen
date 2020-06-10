@@ -48,14 +48,29 @@ class FooDTO
     public $soft_integer;
 
     /**
+     * @var int[]
+     */
+    public $soft_integer_array;
+
+    /**
      * @var bool
      */
     public $soft_boolean;
 
     /**
+     * @var bool[]
+     */
+    public $soft_boolean_array;
+
+    /**
      * @var float
      */
     public $soft_float;
+
+    /**
+     * @var float[]
+     */
+    public $soft_float_array;
 
     /**
      * @var iterable
