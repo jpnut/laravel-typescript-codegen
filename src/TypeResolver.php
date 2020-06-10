@@ -2,15 +2,15 @@
 
 namespace JPNut\CodeGen;
 
-use Illuminate\Support\Str;
-use InvalidArgumentException;
-use phpDocumentor\Reflection\DocBlock\Tags\Return_;
-use phpDocumentor\Reflection\DocBlock\Tags\Var_;
-use phpDocumentor\Reflection\DocBlockFactory;
+use ReflectionType;
 use ReflectionClass;
 use ReflectionMethod;
 use ReflectionProperty;
-use ReflectionType;
+use Illuminate\Support\Str;
+use InvalidArgumentException;
+use phpDocumentor\Reflection\DocBlockFactory;
+use phpDocumentor\Reflection\DocBlock\Tags\Var_;
+use phpDocumentor\Reflection\DocBlock\Tags\Return_;
 
 class TypeResolver
 {
@@ -54,7 +54,7 @@ class TypeResolver
          */
         if ($property->getDocComment() === false
             || empty($varTags = $this->docBlockReader->create($property->getDocComment())->getTagsByName('var'))
-            || !(($tag = $varTags[0]) instanceof Var_)) {
+            || ! (($tag = $varTags[0]) instanceof Var_)) {
             return $this->resolve(
                 is_null($property->getType())
                     ? null
@@ -83,7 +83,7 @@ class TypeResolver
          */
         if ($method->getDocComment() === false
             || empty($returnTags = $this->docBlockReader->create($method->getDocComment())->getTagsByName('return'))
-            || !(($tag = $returnTags[0]) instanceof Return_)) {
+            || ! (($tag = $returnTags[0]) instanceof Return_)) {
             return $this->resolve(
                 is_null($method->getReturnType())
                     ? null
@@ -130,7 +130,7 @@ class TypeResolver
      */
     protected function resolveNullable(string $definition): bool
     {
-        if (!$definition) {
+        if (! $definition) {
             return true;
         }
 
@@ -176,10 +176,10 @@ class TypeResolver
         return array_values(
             array_filter(
                 array_map(
-                    fn(string $type) => $this->mapStringToFieldType($type),
-                    array_filter($types, fn(?string $type) => !is_null($type) && $type !== '')
+                    fn (string $type) => $this->mapStringToFieldType($type),
+                    array_filter($types, fn (?string $type) => ! is_null($type) && $type !== '')
                 ),
-                fn(FieldType $fieldType) => !is_null($fieldType->getType())
+                fn (FieldType $fieldType) => ! is_null($fieldType->getType())
             )
         );
     }
@@ -212,7 +212,7 @@ class TypeResolver
     {
         return $this->normaliseTypes(...array_map(
             function (string $type) {
-                if (!$type) {
+                if (! $type) {
                     return;
                 }
 
